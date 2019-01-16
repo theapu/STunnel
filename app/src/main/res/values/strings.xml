@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">STunnel</string>
+    <string name="save_config">Save config</string>
+    <string name="revert_to_default">Revert to default</string>
+    <string name="on_off">On / Off</string>
+    <string name="log">Log</string>
+
+    <string name="running">STunnel is running</string>
+    <string name="desc">TLS tunneling service</string>
+
+    <string name="btn_ok">OK</string>
+    <string name="btn_cancel">Cancel</string>
+</resources>
