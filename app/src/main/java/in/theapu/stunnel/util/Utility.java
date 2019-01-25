@@ -58,7 +58,8 @@ public class Utility {
     public static void start() {
         if (!isRunning()) {
             try {
-                Runtime.getRuntime().exec(HOME + EXECUTABLE + " " + HOME + CONFIG).waitFor();
+               //Runtime.getRuntime().exec(HOME + EXECUTABLE + " " + HOME + CONFIG).waitFor();
+               Runtime.getRuntime().exec(HOME + EXECUTABLE + " " + HOME + CONFIG).waitFor();
             } catch (Exception e) {
 
             }

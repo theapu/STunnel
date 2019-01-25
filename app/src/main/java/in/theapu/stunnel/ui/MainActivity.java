@@ -6,8 +6,6 @@ package in.theapu.stunnel.ui;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -17,19 +15,21 @@ import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Toast;
 
-import com.kishan.askpermission.AskPermission;
-import com.kishan.askpermission.ErrorCallback;
-import com.kishan.askpermission.PermissionCallback;
-import com.kishan.askpermission.PermissionInterface;
+
+import java.util.List;
 
 import in.theapu.stunnel.R;
 import in.theapu.stunnel.service.ForegroundService;
 import in.theapu.stunnel.util.Utility;
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
+
 import static in.theapu.stunnel.util.Constants.*;
 
-public class MainActivity extends Activity implements CompoundButton.OnCheckedChangeListener, PermissionCallback, ErrorCallback {
+public class MainActivity extends Activity implements CompoundButton.OnCheckedChangeListener, EasyPermissions.PermissionCallbacks {
+
     private static final String TAG = "MainActivity";
-    private static final int REQUEST_PERMISSIONS = 20;
+    private static final int STUNNEL_PERMISSIONS = 123;
 
     public EditText mConfig;
     public Switch mSwitch;
@@ -46,53 +46,37 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         mConfig.setText(Utility.readConfig());
     }
 
-    private void reqPermission() {
-        new AskPermission.Builder(this).setPermissions(
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                .setCallback(this)
-                .setErrorCallback(this)
-                .request(REQUEST_PERMISSIONS);
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
     }
 
-
     @Override
-    public void onPermissionsGranted(int requestCode) {
-        //Toast.makeText(this, "STunnel started", Toast.LENGTH_LONG).show();
+        public void onPermissionsGranted(int requestCode, List<String> list) {
+        // Some permissions have been granted
         Utility.start();
     }
 
-
     @Override
-    public void onPermissionsDenied(int requestCode) {
+    public void onPermissionsDenied(int requestCode, List<String> list) {
+        // Some permissions have been denied
         Toast.makeText(this, "Permissions Denied.", Toast.LENGTH_LONG).show();
     }
 
-    @Override
-    public void onShowRationalDialog(final PermissionInterface permissionInterface, int requestCode) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("STunnel need permission to read SSL certiticates from device storage.");
-        builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                permissionInterface.onDialogShown();
-            }
-        });
-        builder.setNegativeButton(R.string.btn_cancel, null);
-        builder.show();
-    }
-
-    @Override
-    public void onShowSettings(final PermissionInterface permissionInterface, int requestCode) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("We need permissions for this app. Open setting screen?");
-        builder.setPositiveButton(R.string.btn_ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                permissionInterface.onSettingsShown();
-            }
-        });
-        builder.setNegativeButton(R.string.btn_cancel, null);
-        builder.show();
+    @AfterPermissionGranted(STUNNEL_PERMISSIONS)
+    private void reqPermission() {
+        String[] perms = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            // Already have permission, do the thing
+            Utility.start();
+        } else {
+            // Do not have permissions, request them now
+            EasyPermissions.requestPermissions(this, getString(R.string.write_external_storage_rationale),
+                    STUNNEL_PERMISSIONS, perms);
+        }
     }
 
     @Override
@@ -138,7 +122,6 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         save();
         if (!Utility.isRunning()) {
             reqPermission();
-            //Utility.start();
         } else {
             Utility.stop();
         }

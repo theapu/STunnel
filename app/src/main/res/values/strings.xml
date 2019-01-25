@@ -10,4 +10,10 @@
 
     <string name="btn_ok">OK</string>
     <string name="btn_cancel">Cancel</string>
+
+    <string name="channel_name">STunnel</string>
+    <string name="channel_description">STunnel</string>
+
+    <string name="write_external_storage_rationale">STunnel need permission to read SSL certiticates from device storage.</string>
+
 </resources>
